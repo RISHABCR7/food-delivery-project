@@ -3,7 +3,7 @@ const Footer = () => {
   return (
     <div className="   bg-slate-600 flex justify-center text-white ">
       <h4 className="h-20 flex justify-center items-center">
-        Developed with ♥ by Rishab Choudhary
+        Developed with ♥ by Rishab 
       </h4>
     </div>
   );
