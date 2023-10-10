@@ -11,7 +11,7 @@ import MenuShimmer from "./MenuShimmer";
 
 const Body = () => {
   const [allRestaurants, setAllRestaurants] = useState([]);
-  const [filteredRestaurants, setfilteredRestaurants] = useState([]);
+  const [filteredRestaurants, setFilteredRestaurants] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [searchResult, setSearchResult] = useState(true);
 
@@ -22,7 +22,7 @@ const Body = () => {
     getRestaurants();
   }, []);
 
-  async function getRestaurants() {
+  /*async function getRestaurants() {
     const data = await fetch(
       "https://corsproxy.io/?https://www.Swiggy.com/dapi/restaurants/list/v5?lat=18.591945&lng=73.73897649999999&page_type=DESKTOP_WEB_LISTING"
     );
@@ -31,6 +31,45 @@ const Body = () => {
     console.log(json?.data?.cards[2]?.data?.data?.cards);
     setAllRestaurants(json?.data?.cards[2]?.data?.data?.cards);
     setfilteredRestaurants(json?.data?.cards[2]?.data?.data?.cards);
+  }*/
+
+  async function getRestaurants() {
+    try {
+      const response = await fetch("https://corsproxy.io/?https://www.swiggy.com/dapi/restaurants/list/v5?lat=12.9351929&lng=77.62448069999999&page_type=DESKTOP_WEB_LISTING");
+      // if response is not ok then throw new Error
+      if (!response.ok) {
+        const err = response.status;
+        throw new Error(err);
+      } else {
+        const json = await response.json();
+
+        // initialize checkJsonData() function to check Swiggy Restaurant data
+        async function checkJsonData(jsonData) {
+          for (let i = 0; i < jsonData?.data?.cards.length; i++) {
+
+            // initialize checkData for Swiggy Restaurant data
+            let checkData = json?.data?.cards[i]?.card?.card?.gridElements?.infoWithStyle?.restaurants;
+            console.log(checkData,"one")
+
+            // if checkData is not undefined then return it
+            if (checkData !== undefined) {
+              console.log(checkData)
+              return checkData;
+            }
+          }
+        }
+
+        // call the checkJsonData() function which return Swiggy Restaurant data
+        const resData = await checkJsonData(json);
+
+        // update the state variable restaurants with Swiggy API data
+        setAllRestaurants(resData);
+        console.log(resData)
+        setFilteredRestaurants(resData);
+      }
+    } catch (error) {
+      console.error(error); // show error in console
+    }
   }
 
   if (!allRestaurants) return null;
@@ -84,12 +123,16 @@ const Body = () => {
           {searchResult ? (
             filteredRestaurants.map((restaurant) => {
               return (
-                <Link to={"/restaurant/" + restaurant?.data?.id}>
+               /* <Link to={"/restaurant/" + restaurant?.data?.id}>
                   <RestaurantCard
                     {...restaurant?.data}
                     key={restaurant?.data?.id}
-                  />
+                  /></Link>*/
+                
+                <Link to={"/restaurant/" + restaurant?.info?.id}key={restaurant.info.id}>
+                   <RestaurantCard  restaurant={restaurant?.info}  /> 
                 </Link>
+                    
               );
             })
           ) : (
